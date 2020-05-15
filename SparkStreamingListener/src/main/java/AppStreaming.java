@@ -18,6 +18,8 @@ public class AppStreaming {
 		SparkSession sparkSession = SparkSession.builder().appName("SparkStreaming").master("local").getOrCreate();
 
 		// listening on port so we nead socket
+		// use netcat application for test with below lines
+		// nc -l localhost -p 8005
 		Dataset<Row> rowData = sparkSession.readStream().format("socket").option("host", "localhost").option("port", "8005").load();
 
 		Dataset<String> strData = rowData.as(Encoders.STRING());
@@ -34,7 +36,7 @@ public class AppStreaming {
 
 		// count of all words
 		Dataset<Row> groupData = strMapData.groupBy("value").count();
-		StreamingQuery query = groupData.writeStream().outputMode("complete").format("console").start();
+		StreamingQuery query = groupData.writeStream().outputMode("update").format("console").start();
 		query.awaitTermination();
 
 	}
